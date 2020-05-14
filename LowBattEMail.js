@@ -1,4 +1,4 @@
-// LowBattEMail.js V 0.1.2
+// LowBattEMail.js V 0.1.3
 // Geraete mit LowBat per EMail melden
 // (c) 2020 WagoTEC.de, freigegeben unter MIT Lizenz
 
@@ -20,7 +20,7 @@ var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}];
 //  log(debugtext);               // Ausgabe der Debugtexte bei Bedarf aktivieren
 //}
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ende individuelle Konfiguration !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const SCRIPT_VERSION      = "V 0.1.1";                  // Version Info
+const SCRIPT_VERSION      = "V 0.1.3";                  // Version Info
 const COLOR_LOWBAT        = "#ff0033";                  // Zeilenfarbe wenn Gerät nicht erreichbar
 const COLOR_OKBAT         = "#00ff00";                  // Zeilenfarbe wenn Gerät erreichbar
 const SHORT_LOWBAT_TIME   = 360000;                     // ms nach 6 Minuten gilt Gerät als Dauerhaft LOWBAT
@@ -68,7 +68,8 @@ const TEXT_BATTERY_LOW        = "Low Battery";
 const TEXT_BATTERY_OK         = "OK";
 
 var toolTypeList = ["Homematic"];                               // Liste der verfügbaren ToolChain's
-var statustypList = ["Flag", "Prozent", "Spannung"];
+var statustypList = ["Flag", "Prozent", "Spannung"];            // Liste der verschiedenen LowBat Statustypen
+// Ignore List fuer Homematic Geraete, die bei der Auswertung ignoriert werden
 var devIgnoreHM = "_HM-LC-Sw1-FM_, _HM-LC-Sw1-Pl-CT-R1_";
 
 DEBUGNAME = "LowBattEMail";
@@ -116,6 +117,7 @@ setTimeout(writeChangeTable, 40000);                  // Changetabelle erneuern
 
 // Bei allen Geräten die Nutzungszeit der Batterien um 1 Tag hochzählen
 // und dann eine Statusmail versenden, sollten leere Batterien da sein
+// LowBat Counts um 1 erniedrigen
 schedule("0 1 * * *", function () {
   var head      = "";
   var liefetime = 0;
@@ -125,25 +127,25 @@ schedule("0 1 * * *", function () {
     lifetime = getState(head + STATE_RUNTIME_AKT).val;
     lifetime += 1;
     setState(head + STATE_RUNTIME_AKT, lifetime);
-    if(obj.lowcount > 0) obj.lowcount -= 1;                     // Anzahl Kurzzeit Ausfall
+    if(obj.lowcount > 0) obj.lowcount -= 1;                     // Anzahl Kurzzeit LowBat
   });
   myDebug("LifetimeCount ===>Will be triggered at 1  AM every Day!<===");
-  sendEMail(EMAILTYPE_DAYLY);
+  sendEMail(EMAILTYPE_DAYLY);                                   // Taegliche Status Mail, wenn leere Batterien vorhanden sind
 });
 
 log ("LowBattery " + SCRIPT_VERSION + " Monitor wurde initalisiert");
+
 // Status EMail manuell versenden durch Flag ausgelöst (über VIS)
 on(stateHeader + STATE_SENDMAIL_BUTTON, function(obj) {
     if (obj.state.val) {
+      log("Manuelle Statusmail wurde ausgeloest");
       fSendMailAllways = true;
       sendEMail(EMAILTYPE_STATUS);
       setStateDelayed(stateHeader + STATE_SENDMAIL_BUTTON, false,5000);
-      log("Manuelle Statusmail wurde ausgeloest");
     }
 });
 
 // Batterie gewechselt Button ueberwachen durch Flag 0-4 ausgelöst (über VIS)
-
 on(stateHeader + STATE_REPLACE_STARTFLAG + "0", function(obj) {
     if (obj.state.val) {
       batteryChangeCommand(0);
@@ -191,49 +193,46 @@ function checkBattery(index) {
   var listchange = false;
   var thandle = watchlist[index].thandle;
 
-  if(toolChain(TOOLCOM_IS_BAT_LOW_FROMDEVICE,index)) {            // Zustand direkt vom Device == Lowbat
-    watchlist[index].thandle = setTimeout(batteryLongLow,SHORT_LOWBAT_TIME,index);
+  if(toolChain(TOOLCOM_IS_BAT_LOW_FROMDEVICE,index)) {                                  // Zustand direkt vom Device == Lowbat ?
+    watchlist[index].thandle = setTimeout(batteryLongLow,SHORT_LOWBAT_TIME,index);      // In einiger Zeit nochmal prüfen
     myDebug("Eine Geraet meldet LowBat: " + watchlist[index].name + " Pruefung laeuft");
   } else {                                                        // Zustand direkt vom Device == OK
-    if(watchlist[index].thandle) {
-      // Es laeuft bereits eine Ueberpruefung
+    if(watchlist[index].thandle) {                                // Es laeuft bereits eine Ueberpruefung
       clearTimeout(watchlist[index].thandle);                     //Timeout loeschen
       watchlist[index].thandle = null;
-      watchlist[index].lowcount = watchlist[index].lowbatCount + 1;
+      watchlist[index].lowcount = watchlist[index].lowbatCount + 1; // Es war ein kurzzeitiger LowBat
       if(watchlist[index] > SHORT_LOWBAT_MAX) {               // Batterie hat maximale Anzahl von Lowbats ueberschritten
-        watchlist[index].isLow = true;                        // Geraet dauerhaft lowbat
+        watchlist[index].isLow = true;                        // Geraet als dauerhaft lowbat markieren
         if(!watchlist[index].isSend) listchange = true;       // Wenn Zustand noch nicht verarbeitet wurde
-        lastErrorDevice = watchlist[index].name;
+        lastErrorDevice = watchlist[index].name;              // Name des Geraetes merken
         log("Ein Geraet hat zu viele kurzfristige LowBat: " + watchlist[index].name);
       } else {
         log("Ein Geraet hatte einen kurzzeitigen LowBat: " + watchlist[index].name);
       }
     }
   }
-  if(listchange === true) {
-    if (eMailDelayID !== 0) clearTimeout(eMailDelayID);                           // Vorhandenen EMail Delay stoppen
-    eMailDelayID = setTimeout(sendEMail, EMAIL_SEND_DELAY,EMAILTYPE_LOWBAT);      // Zeitversetzen EMail Versand anstossen
+  if(listchange === true) {                                                   // Es gibt was zu versenden
+    if (eMailDelayID !== 0) clearTimeout(eMailDelayID);                       // Vorhandenen EMail Delay stoppen
+    eMailDelayID = setTimeout(sendEMail, EMAIL_SEND_DELAY,EMAILTYPE_LOWBAT);  // Zeitversetzen EMail Versand anstossen
     clearTimeout(writeChangeTable);
-    setTimeout(writeChangeTable, 1000);
-    myDebug("Zeitversetzer EMail Versand angestossen (checkBattery)");
-    myDebug("Zeitversetzer Tabellenaufbau angestossen (checkBattery)");
+    setTimeout(writeChangeTable, 1000);                                       // Tabelle fuer VIS neu organisieren
+    myDebug("Zeitversetzer EMail Versand und Tabellenaufbau angestossen (checkBattery)");
   }
 }
 
-// Diese Funktion wird Zeitverzoegert aufgerufen, wenn zwischenzeitlich keine BatOK Meldung kam
+// Diese Funktion wird Zeitverzoegert aufgerufen, wenn zwischenzeitlich keine BatOK Meldung vom Geraet kam
 function batteryLongLow(index) {
   watchlist[index].thandle = null;
-  watchlist[index].isLow = true;    // Geraet dauerhaft LowBat
+  watchlist[index].isLow = true;                      // Geraet dauerhaft LowBat
   if(!watchlist[index].isSend) listchange = true;     // Wenn Zustand noch nicht verarbeitet wurde
-  lastErrorDevice = watchlist[index].name;
+  lastErrorDevice = watchlist[index].name;            // Name des Geraetes merken
   log("Ein Geraet meldet Dauerhaft LowBat: " + watchlist[index].name, 'warn');
 
   if (eMailDelayID !== 0) clearTimeout(eMailDelayID);                           // Vorhandenen EMail Delay stoppen
   eMailDelayID = setTimeout(sendEMail, EMAIL_SEND_DELAY,EMAILTYPE_LOWBAT);      // Zeitversetzen EMail Versand anstossen
-  clearTimeout(writeChangeTable);
+  clearTimeout(writeChangeTable);                                               // VIS Tabelle neu aufbauen
   setTimeout(writeChangeTable, 1000);
-  myDebug("Zeitversetzer EMail Versand angestossen (batteryLongLow)");
-  myDebug("Zeitversetzer Tabellenaufbau angestossen (batteryLongLow)");
+  myDebug("Zeitversetzer EMail Versand und Tabellenaufbau angestossen (batteryLongLow)");
 }
 
 function toolChain(command, index) {
@@ -263,7 +262,7 @@ function toolChain(command, index) {
   }
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Die Lowbat States eines Adapters in einer Liste erfassen
+// Geraete eines Adapters zur Ueberwachungsliste hinzufuegen
 // Input: header  = string der jedem Geraetenamen vorangestellt wird
 //        adapter = Name des Adapters von welchem die Batteriezustaende erfasst werden soll (zB hm-rpc4)
 //        adType  = ID des Tools, mit dem die Zustaende erfasst werden (Zur Zeit nur TOOLTYPE_HM)
@@ -275,7 +274,7 @@ function toolChain(command, index) {
 // lowcount = Anzahl der kurzfristigen Lowbat Meldungen des Geraets
 // isLow    = ist true, wenn Batterie definitiv leer ist, wird erst nach Btteriewechsel zurueck gesetzt
 // isSend   = ist true, wenn dieser Zustand bereits per Mail versendet wurde, wird erst bei Batteriewechsel zurueckgesetzt
-// stateType= const STATUSTYP_FLAG, STATUSTYP_PERCENT, STATUSTYP_VOLTAGE
+// stateType= STATUSTYP_FLAG, STATUSTYP_PERCENT, STATUSTYP_VOLTAGE
 // thandle    = immer null
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 function addToWatchlist(header,adapter, adType) {
@@ -397,15 +396,15 @@ function writeChangeTable(){
 
     if(obj.isLow === true) {      // Batterie Wechselflag gesetzt
       // Dann dieses Gerät in das TableArray einfügen
-      setState(stateHeader + STATE_REPLACE_DEVNAME + tableIndex, obj.name);     // Klartextname des Geraetes
-      setState(stateHeader + STATE_REPLACE_INDEX   + tableIndex, i);            // Index in der Watchlist
+      setState(stateHeader + STATE_REPLACE_DEVNAME + tableIndex, obj.name);   // Klartextname des Geraetes
+      setState(stateHeader + STATE_REPLACE_INDEX   + tableIndex, i);          // Index in der Watchlist
       tableIndex += 1;
       lowbatCount += 1;
-      deviceList = deviceList + obj.name + '<br>';                              // Klartextliste der gestörten Geräte erweitern
+      deviceList = deviceList + obj.name + '<br>';                            // Klartextliste der gestörten Geräte erweitern
     } else {
       okbatCount += 1;
     }
-    if(tableIndex >= REPLACE_STATES) return;                      // Abbrechen, da Tabelle voll
+    if(tableIndex >= REPLACE_STATES) return;                                  // Abbrechen, da Tabelle voll
   });
   setState(stateHeader + STATE_LOWBATTERY_COUNT, lowbatCount);
   setState(stateHeader + STATE_OKBATTERY_COUNT , okbatCount);
@@ -413,8 +412,7 @@ function writeChangeTable(){
   myDebug("writeChangeTable durchgelaufen");
 }
 
-// Status EMail, nur wenn sich Gerätezustand geändert hat
-// Ist das flag fSendMailAllways gesetzt wird die Mail auch dann versendet, wenn kein Gerät LowBat hat
+// EMail versenden
 function sendEMail(emailtype) {
   var lowbatCount = 0;
   var okbatCount  = 0;
@@ -426,10 +424,8 @@ function sendEMail(emailtype) {
   var subjectText = EMAIL_SUBJ_HEAD + "Meldung von " + lastErrorDevice + ", Batterie Zustand hat sich geändert";
   var sendIt          = false;
   var sendAllDevices  = false;          // Wenn true, werden die States aller Geraete per EMail versendet
-  //var lowText = "";
-  //var noLowText = "";
-  eMailDelayID = 0;
 
+  eMailDelayID = 0;
   myDebug("EMail Funktion (sendEMail) wurde aufgerufen Type=" +emailtype);
   switch (emailtype) {
     case EMAILTYPE_START:
@@ -452,7 +448,7 @@ function sendEMail(emailtype) {
       break;
 
     case EMAILTYPE_DAYLY:
-      //  Es werden alle Geraete versendet, nur wenn Lowbat lowbat vorhanden
+      //  Es werden alle Geraete versendet, nur wenn Lowbat vorhanden
       subjectText = EMAIL_SUBJ_HEAD + "Taeglicher Statusbericht ueber Geraete mit niedrigem Batterie Zustand";
       sendAllDevices = false;
       break;
@@ -647,10 +643,3 @@ function stateCreate() {
 
   });
 }
-
-/*Changelog
-V0.12 20.03.2018  EMailadressen und Betreffzeile angepasst auf Synology Mailserver
-V0.09 22.05.2018  Angepasst auf neue globalDebug
-V0.10 22.05.2018  Debugmeldungen verfeinert
-V0.11 01.08.2018  Zeilenumbruch bei Ausgabe der Baterriewechselmeldung hat gefehlt
-*/
