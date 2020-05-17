@@ -5,7 +5,7 @@ Javascript zum versenden von Status Mails bei Aenderung von Batteriezustaenden.
 - Zaehlt die Laufzeiten der Batterien (aktuelle Laufzeit/ letzter Zyklus)
 - Speichert das Datum des letzten Batteriewechsels
 - Mailversand kann ueber Objekt Flag auch manuell ausgelöst werden (z.B. ueber VIS)
-- Nur kurzzeitige LowBat Meldungen werden ignoriert 
+- Nur kurzzeitige LowBat Meldungen werden ignoriert
 - Taegliche Statusmail, sofern leere Batterien erkannt wurden
 - Kompatibel zur Homematic und Homematic-IP
 - Nachruestung weiterer Adaptertypen vorbereitet
@@ -52,7 +52,7 @@ Jeder Adapter Eintrag besteht aus 3 Parametern wie folgt:
 Ist in deiner IObroker Installation die Instanz  "hm-rpc.1" fuer deine Homematic Geraete zustaendig und die Instanz "hm-rpc.2" fuer deine Homematic-IP Geräte zustaendig, muss die Konfiguration folgendermassen aussehen:
 
 ```javascript
-var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}
+var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM},
                     {header:"", name:"hm-rpc.2.", typ:TOOLTYPE_HM}];
 ```
 
@@ -113,7 +113,7 @@ Die Felder sind nur sichtbar, wenn leere Batterien vorhanden sind.
 Die View befindet sich im VIS-Template Ordner
 
 **ACHTUNG!** Laueft das Script nicht unter der Instanz "0" (javascript.0) sondern z.B. auf der Instanz javascript.1, muss die View angepasst werden.
-Dazu einfach die Eintraege in der Textdatei durch *"suchen und ersetzen"* austauschen: Suche: "jvascript.0" ersetze mit "javascript.1". Danach kann das Widget in VIS importiert werden.
+Dazu einfach die Eintraege in der Textdatei durch *"suchen und ersetzen"* austauschen: Suche: "javascript.0" ersetze mit "javascript.1". Danach kann das Widget in VIS importiert werden.
 
 Oder:
 
@@ -134,27 +134,28 @@ Hier einige Ansaetze zur Problembehandlung
 <u>Problem:</u> Das Script erfasst Geraete, die ohne Batterie betrieben sind: Kommt vor, insbesondere einige Homematic Geraete, die an 220V betrieben werden, haben einen indicator.lowbat. Diese Geraete koennen von der toolChain auf eine Ausnahmeliste gesetzt werden. Bitte den genauen Geraetetyp auf Github als Issue einstellen, ich versuche dann zeitnah das Geraet auf die Ausnahmeliste zu setzen.
 Fuer Entwickler sind hier einige Infos zusammengefasst: [DeveloperInfo](DeveloperInfo/DeveloperInfo.md)
 
-Bei der Integration von "nich Homematic" Geraeten bin ich auf mithilfe angewiesen, da ich die erforderlichen Komponenten ZigBee etc. nicht besitze.
+Bei der Integration von "nicht Homematic" Geraeten bin ich auf mithilfe angewiesen, da ich die erforderlichen Komponenten ZigBee etc. nicht besitze.
 
 ### Fehlerreports
 
 Bitte vorranig ueber ein neues Issue hier auf Github einstellen, oder wenn es nicht anders geht per mail an <support@wagotec.de>. Eine genaue Fehlerbeschreibung ist zwingend anzugeben!
 
 # History
-
-**0.1.3 (2020-05-12)**
-
+**0.1.4 (2020-05-14)**
 - (jogicom)
   - Anpassungen des ReadMe
-  - Code neu formatiert und Versionsnummer angepasst
+  - Beim versenden der taeglichen Statusmail wurde keine Mail versendet, obwohl leere Batterien vorhanden sind. (sendEmail)
+  - Fehler in der Dokumentation zur Konfiguration beseitigt (Kai)
+  - Angaben zur Adapterkonfiguration werden jetzt auf vorhandensein geprueft
+
+**0.1.3 (2020-05-12)**
+- (jogicom) Anpassungen des ReadMe, Code neu formatiert und Versionsnummer angepasst
 
 **0.1.2 (2020-05-12)**
-- (jogicom)
-  - Ready for Final Test
+- (jogicom) Ready for Final Test
 
 **0.1.0 (2020-05-10)**
-- (jogicom)
-  - First release auf GitHub
+- (jogicom) First release auf GitHub
 
 
 

@@ -27,8 +27,8 @@ var toolTypeList = ["Homematic", "ZigBee"];
 
 Als naechstes muss die Adaperliste angepasst werden, damit diese Geraete auch auf der Watchlist landen
 ```javascript
-var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}
-​                   {header:"", name:"zigbee.0.", typ:TOOLTYPE_ZB}];`
+var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM},
+​                   {header:"", name:"zigbee.0.", typ:TOOLTYPE_ZB}  ];
 ```
 
 ###### Erweitern der Function addToWatchlist
@@ -57,7 +57,7 @@ Der neue Listeneintrag kann dann mit watchlist.push der Watchliste hinzugefuegt 
 ###### Erweitern der toolChain
 Die Function toolChain stellt Funktionen bereit, die Informationen ueber ein Geraet zur Verfuegung stellen. Das Script fragt die Geraete nie direkt ab, sondern nur ueber die toolChain. Dazu muss die toolChain um das neue Tool erweitert werden.
 
-Der tooChain werden beim Aufruf 2 Parameter uebergeben:
+Der toolChain werden beim Aufruf 2 Parameter uebergeben:
 
 1. command (das Kommando was abgerufen wird
 2. index, der index des betreffendes Geraetes in der watchlist
@@ -69,7 +69,7 @@ Die toolChain muss auf folgende Kommandos wie folgt antworten:
 | TOOLCOM_IS_BAT_LOW_FROMDEVICE | Ein Bool, das den Zustand der Batterie des Geraetes darstellt, also false=BatteryOK, true= BatteryLow |
 | TOOLCOM_GETSTATETEXT          | Einen String der den Zustand der Batterie wieder gibt, also "Battery OK", "Batterie Low", "Battery 2.7V" oder auch "Battery 10%". Was hier zurueck gegeben wird, erscheint bei der Status Mail im Batterie zustand. |
 
-Somit wurde der neue Adapter Typ (hoffentlich erfolgreich in implementiert)
+Somit wurde der neue Adapter Typ (hoffentlich erfolgreich implementiert)
 
 ## Objekte und States die Verwendung finden
 

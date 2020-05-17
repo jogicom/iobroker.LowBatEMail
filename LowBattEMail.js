@@ -1,4 +1,4 @@
-// LowBattEMail.js V 0.1.3
+// LowBattEMail.js V 0.1.4
 // Geraete mit LowBat per EMail melden
 // (c) 2020 WagoTEC.de, freigegeben unter MIT Lizenz
 
@@ -20,7 +20,7 @@ var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}];
 //  log(debugtext);               // Ausgabe der Debugtexte bei Bedarf aktivieren
 //}
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ende individuelle Konfiguration !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const SCRIPT_VERSION      = "V 0.1.3";                  // Version Info
+const SCRIPT_VERSION      = "V 0.1.4";                  // Version Info
 const COLOR_LOWBAT        = "#ff0033";                  // Zeilenfarbe wenn Gerät nicht erreichbar
 const COLOR_OKBAT         = "#00ff00";                  // Zeilenfarbe wenn Gerät erreichbar
 const SHORT_LOWBAT_TIME   = 360000;                     // ms nach 6 Minuten gilt Gerät als Dauerhaft LOWBAT
@@ -85,7 +85,20 @@ var watchlist = [];
 
 // Generiere Watch-Objektliste fuer alle konfigurierten Adapter
 adapterList.forEach(function(obj,i) {
-  addToWatchlist(obj.header,obj.name, obj.typ);
+  // Zuerst pruefen ob die Parameter vorhanden sind, wenn einer fehlt, abbrechen
+  if(typeof obj.header === "undefined") {
+    log("Fehler in der Adapterkonfiguration, pruefe die Angabe header: in der Adapterliste", 'error');
+    return;
+  }
+  if(typeof obj.name === "undefined") {
+    log("Fehler in der Adapterkonfiguration, pruefe die Angabe name: in der Adapterliste", 'error');
+    return;
+  }
+  if(typeof obj.typ === "undefined") {
+    log("Fehler in der Adapterkonfiguration, pruefe die Angabe typ: in der Adapterliste", 'error');
+    return;
+  }
+  addToWatchlist(obj.header,obj.name, obj.typ);         // Eintrag in die Watchliste
 });
 
 // Sortieren des watchlist Arrays nach Geraetename
@@ -500,7 +513,8 @@ function sendEMail(emailtype) {
         tableText += "<TR bgcolor=" + COLOR_LOWBAT + "><TD>" + obj.name;
         tableText += "<TD>" + toolChain(TOOLCOM_GETSTATETEXT,i);
         tableText += "<TD>" + lastCycle + "<TD>" + aktCycle + "<TD>" + lastBattChange;
-        if(!obj.isSend) sendIt = true; // Nur Mail versenden, wenn dieser Zustand noch nicht versendet wurde
+        if(!obj.isSend) sendIt = true;                      // Nur Mail versenden, wenn dieser Zustand noch nicht versendet wurde
+        if(emailtype == EMAILTYPE_DAYLY) sendIt = true;     // Bei der taeglichen StatusMail immer versenden
         obj.isSend = true; // Markierung dass dieser Zustand bereits versendet wurde
       }
     }
