@@ -1,4 +1,4 @@
-// LowBattEMail.js V 0.1.4
+// LowBattEMail.js V 0.1.5
 // Geraete mit LowBat per EMail melden
 // (c) 2020 WagoTEC.de, freigegeben unter MIT Lizenz
 
@@ -20,9 +20,9 @@ var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}];
 //  log(debugtext);               // Ausgabe der Debugtexte bei Bedarf aktivieren
 //}
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ende individuelle Konfiguration !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const SCRIPT_VERSION      = "V 0.1.4";                  // Version Info
-const COLOR_LOWBAT        = "#ff0033";                  // Zeilenfarbe wenn Gerät nicht erreichbar
-const COLOR_OKBAT         = "#00ff00";                  // Zeilenfarbe wenn Gerät erreichbar
+const SCRIPT_VERSION      = "V 0.1.5";                  // Version Info
+const COLOR_LOWBAT        = "#ff0033";                  // Zeilenfarbe wenn Gerät LowBat
+const COLOR_OKBAT         = "#00ff00";                  // Zeilenfarbe wenn Gerät OK
 const SHORT_LOWBAT_TIME   = 360000;                     // ms nach 6 Minuten gilt Gerät als Dauerhaft LOWBAT
 const EMAIL_SEND_DELAY    = 120000;                     // ms EMail Versand um 2 Minuten verzögern
 const SHORT_LOWBAT_MAX    = 5;                          // Bei 5 LOWBAT Meldungen pro Tag wird Wechselflag gesetzt, wenn Meldung toggelt
