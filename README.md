@@ -136,12 +136,29 @@ Fuer Entwickler sind hier einige Infos zusammengefasst: [DeveloperInfo](Develope
 
 Bei der Integration von "nicht Homematic" Geraeten bin ich auf mithilfe angewiesen, da ich die erforderlichen Komponenten ZigBee etc. nicht besitze.
 
+### Homematic IP Geräte werden nicht erfasst
+
+Tauchen HMIP Geräte trotz korrekter Script-Konfiguration nicht in der Liste auf, bitte mal in der Object-Liste in IObroker prüfen, ob dort der indicator.lowbat in der Rolle der entsprechenden Geräte richtig gesetzt wurde:
+
+![IndicatorLowbat](figures/IObrokerIndicator.PNG)
+
+Fehlt diese Rolle, kann sie manuell eingetragen werden. Warum IObroker neuerdings diese Rolle nicht richtig setzt, bin ich aktuell am klären.
+
 ### Fehlerreports
 
 Bitte vorranig ueber ein neues Issue hier auf Github einstellen, oder wenn es nicht anders geht per mail an <support@wagotec.de>. Eine genaue Fehlerbeschreibung ist zwingend anzugeben!
 
 # History
+
+**0.1.4 (2020-06-05)**
+
+- (jogicom)
+  - Anpassungen des ReadMe wegen fehlendem Indicator
+  - VIS Template war kaputt, neu hochgeladen
+  
+
 **0.1.4 (2020-05-14)**
+
 - (jogicom)
   - Anpassungen des ReadMe
   - Beim versenden der taeglichen Statusmail wurde keine Mail versendet, obwohl leere Batterien vorhanden sind. (sendEmail)
