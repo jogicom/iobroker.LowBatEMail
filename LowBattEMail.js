@@ -6,8 +6,8 @@
 const TOOLTYPE_HM  = 0;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! individuelle Konfiguration !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//var adapterList = [ {header:"",name:"hm-rpc.1.", typ:TOOLTYPE_HM} ,
-//                    {header:"" name:"hm-rpc.4.", typ:TOOLTYPE_HM}];
+//var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM} ,
+//                    {header:"", name:"hm-rpc.4.", typ:TOOLTYPE_HM}];
 var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}];
 
 // EMail Einstellungen wenn nicht Global implementiert hier definieren
