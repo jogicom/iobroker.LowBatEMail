@@ -142,7 +142,9 @@ Tauchen HMIP Geräte trotz korrekter Script-Konfiguration nicht in der Liste auf
 
 ![IndicatorLowbat](figures/IObrokerIndicator.PNG)
 
-Fehlt diese Rolle, kann sie manuell eingetragen werden. Warum IObroker neuerdings diese Rolle nicht richtig setzt, bin ich aktuell am klären.
+Fehlt diese Rolle, muss sie manuell eingetragen werden. Danach das Script neu starten, dann sollten die Geräte auftauchen.
+
+Ab der **IObroker hm-rpc Version 1.14.6** sollte das Problem gelöst sein.
 
 ### Fehlerreports
 
