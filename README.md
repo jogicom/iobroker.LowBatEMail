@@ -25,7 +25,7 @@ Javascript zum versenden von Status Mails bei Aenderung von Batteriezustaenden.
 ------
 
 ## Benoetigte Hard/Software
-- Homematic CCU (auf CCU2 getestet)
+- Homematic CCU (auf CCU2,CCU3 und Raspberrymatic getestet)
 - IO-Broker mit ...
   - Java-Script Adapter
   - Email-Adapter
@@ -151,6 +151,13 @@ Ab der **IObroker hm-rpc Version 1.14.6** sollte das Problem gelöst sein.
 Bitte vorranig ueber ein neues Issue hier auf Github einstellen, oder wenn es nicht anders geht per mail an <support@wagotec.de>. Eine genaue Fehlerbeschreibung ist zwingend anzugeben!
 
 # History
+
+**0.1.5 (2020-06-07)**
+
+- (jogicom)
+  - Fehler behoben, wenn bei ScriptStart ein Geraet LOWBAT hatte
+  - Fehler behoben, wenn ein Gerät einen kurzfristigen LOWBAT hatte
+  
 
 **0.1.4 (2020-06-05)**
 

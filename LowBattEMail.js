@@ -82,6 +82,7 @@ var stateHeader = "javascript." + instance + ".BatterieStatus.";
 setStateDelayed(stateHeader + STATE_SENDMAIL_BUTTON, false, 20000);    // Button fuer Manuellen Mailversand: Reset falls gesetzt
 
 var watchlist = [];
+var bchange_list = [];
 
 // Generiere Watch-Objektliste fuer alle konfigurierten Adapter
 adapterList.forEach(function(obj,i) {
@@ -116,7 +117,7 @@ stateCreate();        // Benoetigte States erstellen
 watchlist.forEach(function(obj, i) {
   var status = toolChain(TOOLCOM_IS_BAT_LOW_FROMDEVICE,i);
   if(status === true) {
-    setTimeout(batteryLongLow,SHORT_LOWBAT_TIME,i);
+    obj.thandle = setTimeout(batteryLongLow,SHORT_LOWBAT_TIME,i);
     myDebug("Eine Geraet meldet LowBat bei Script Start: " + watchlist[i].name + " Pruefung laeuft");
   }
 });
@@ -158,45 +159,20 @@ on(stateHeader + STATE_SENDMAIL_BUTTON, function(obj) {
     }
 });
 
-// Batterie gewechselt Button ueberwachen durch Flag 0-4 ausgelöst (über VIS)
-on(stateHeader + STATE_REPLACE_STARTFLAG + "0", function(obj) {
-    if (obj.state.val) {
-      batteryChangeCommand(0);
-      clearStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "0");
-      setStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "0", false, 10000);
-    }
-});
+// ObjekteListe für Batteriewechsel Buttons bilden
+for(r=0; r< REPLACE_STATES; r++) {
+    bchange_list.push({id:stateHeader + STATE_REPLACE_STARTFLAG + r});
+}
 
-on(stateHeader + STATE_REPLACE_STARTFLAG + "1", function(obj) {
-    if (obj.state.val) {
-      batteryChangeCommand(1);
-      clearStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "1");
-      setStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "1", false, 10000);
+//Subscribes auf alle Batterie-gewechselt Buttons bilden
+bchange_list.forEach(function(button, i) {
+  on ({id: button.id,    change: "ne" }, function (obj) {
+    if(obj.state.val) {
+        batteryChangeCommand(i);
+        clearStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + i);
+        setStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + i, false, 10000);
     }
-});
-
-on(stateHeader + STATE_REPLACE_STARTFLAG + "2", function(obj) {
-    if (obj.state.val) {
-      batteryChangeCommand(2);
-      clearStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "2");
-      setStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "2", false, 10000);
-    }
-});
-
-on(stateHeader + STATE_REPLACE_STARTFLAG + "3", function(obj) {
-    if (obj.state.val) {
-      batteryChangeCommand(3);
-      clearStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "3");
-      setStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "3", false, 10000);
-    }
-});
-
-on(stateHeader + STATE_REPLACE_STARTFLAG + "4", function(obj) {
-    if (obj.state.val) {
-      batteryChangeCommand(4);
-      clearStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "4");
-      setStateDelayed(stateHeader + STATE_REPLACE_STARTFLAG + "4", false, 10000);
-    }
+  });
 });
 
 // END OF SCRIPT
@@ -213,8 +189,8 @@ function checkBattery(index) {
     if(watchlist[index].thandle) {                                // Es laeuft bereits eine Ueberpruefung
       clearTimeout(watchlist[index].thandle);                     //Timeout loeschen
       watchlist[index].thandle = null;
-      watchlist[index].lowcount = watchlist[index].lowbatCount + 1; // Es war ein kurzzeitiger LowBat
-      if(watchlist[index] > SHORT_LOWBAT_MAX) {               // Batterie hat maximale Anzahl von Lowbats ueberschritten
+      watchlist[index].lowcount += 1;                         // Es war ein kurzzeitiger LowBat Counter anpassen
+      if(watchlist[index].lowcount > SHORT_LOWBAT_MAX) {      // Batterie hat maximale Anzahl von Lowbats ueberschritten
         watchlist[index].isLow = true;                        // Geraet als dauerhaft lowbat markieren
         if(!watchlist[index].isSend) listchange = true;       // Wenn Zustand noch nicht verarbeitet wurde
         lastErrorDevice = watchlist[index].name;              // Name des Geraetes merken
@@ -334,7 +310,7 @@ function addToWatchlist(header,adapter, adType) {
   }
 }
 
-// Batterietausch wurde für das Gerät (Index im Array) bestätigt
+// Batterietausch wurde für das Gerät (Index im Array) bestätigt (Button Batterie gewechselt)
 function batteryChangeCommand(tableIndex) {
   var index = getState(stateHeader + STATE_REPLACE_INDEX+ tableIndex).val;          // Index des Geraetes in der watchlist
   if(index === -1) {
@@ -370,8 +346,8 @@ function batteryChangeCommand(tableIndex) {
     infotext += "\nBatteriewechsel fuer " + devName + " wurde ausgefuehrt\n";
   } else {
     // Gerät hat immer noch BattLow
-    log("Batteriewechsel fuer " + devName + " nicht moeglich, da immer noch BattLow");
-    infotext += "\nBatteriewechsel fuer " + devName + " nicht moeglich, da immer noch BattLow\n";
+    log("Batteriewechsel fuer " + devName + " nicht moeglich, da immer noch LowBat");
+    infotext += "\nBatteriewechsel fuer " + devName + " nicht moeglich, da immer noch LowBat\n";
   }
   setState(stateHeader + STATE_REPLACE_INFOBOX, infotext);
   setTimeout(clearInfoBox, CLEAR_INFOBOX_TIME);
