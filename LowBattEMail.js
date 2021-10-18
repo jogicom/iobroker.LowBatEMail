@@ -1,6 +1,6 @@
-// LowBattEMail.js V 0.1.5
+// LowBattEMail.js V 0.1.6
 // Geraete mit LowBat per EMail melden
-// (c) 2020 WagoTEC.de, freigegeben unter MIT Lizenz
+// (c) 2021 WagoTEC.de, freigegeben unter MIT Lizenz
 
 // Liste der verfügbaren ToolChain's
 const TOOLTYPE_HM  = 0;
@@ -20,7 +20,7 @@ var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}];
 //  log(debugtext);               // Ausgabe der Debugtexte bei Bedarf aktivieren
 //}
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ende individuelle Konfiguration !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const SCRIPT_VERSION      = "V 0.1.5";                  // Version Info
+const SCRIPT_VERSION      = "V 0.1.6";                  // Version Info
 const COLOR_LOWBAT        = "#ff0033";                  // Zeilenfarbe wenn Gerät LowBat
 const COLOR_OKBAT         = "#00ff00";                  // Zeilenfarbe wenn Gerät OK
 const SHORT_LOWBAT_TIME   = 360000;                     // ms nach 6 Minuten gilt Gerät als Dauerhaft LOWBAT
@@ -278,28 +278,33 @@ function addToWatchlist(header,adapter, adType) {
     // Dieser Adapter ist als HM bekannt, das state welches
     // lowbat signalisiert ist ein BOOL
     //-------------------------------------------------------
-    var csIndiLowbat  = $('[role=indicator.lowbat]');           // Liste aller Objekte mit role indicator.lowBattDevices
+    var csIndiLowbat  = $('[role=indicator.lowbat]');                 // Liste aller Objekte mit role indicator.lowBattDevices
     csIndiLowbat.each(function(obj,i) {
-      ad =obj.match(adapter);                                   // Pruefen ob Adaptername stimmt
-      if(ad){                                                   // Adaptername passt
-        stateName = getObject(obj).common.name;                 // Name ermitteln (z.B. Vorratsraum:0.LOWBAT)
-        ad = stateName.match(":0.");                            // Prüfen ob Name passt, da manche Geraete mehrere LowBat Flags haben
-        if(ad) {                                                 // Wenn Zeichenkette vorhanden
-          n = stateName.split(":0.");                           // String splitten, n[0] enthaelt dann 'Vorratsraum'
-          //Geraetetyp pruefen ob auf der IgnoreList
-          s = obj.split(".");                                       // ID spitten
-          masterid = s[0] + "." + s[1] + "." + s[2];                // und neu zusammen setzen
-          mastertype = "_" + getObject(masterid).native.TYPE + "_"; // Device Typ auslesen
-          s = devIgnoreHM.match(mastertype);                        // Pruefen ob in Sperrliste
-          if(s) {
-            // Geraet befindet sich auf der Sperrliste und wird nicht ueberwacht
-            myDebug("Geraet " + header + n[0] + " mit ID " + obj + " NICHT zur Watchlist hinzugefuegt (Sperrliste)" );
-          } else {
-            // Dieses Geraet wird in die Watchlist aufgenommen
-            //watchlist.push({id:obj, name:header + n[0], tool:adType, lowcount:0,isLow:false, isSend:false, stateType:STATUSTYP_FLAG, value:0});
-            watchlist.push({id:obj, name:header + n[0], tool:adType, lowcount:0,isLow:false, isSend:false, stateType:STATUSTYP_FLAG, thandle:null});
-            myDebug("Geraet " + header + n[0] + " mit ID " + obj + " zur Watchlist hinzugefuegt" );
+      ad =obj.match(adapter);                                         // Pruefen ob Adaptername stimmt
+      if(ad){                                                         // Adaptername passt
+        stateName = getObject(obj).common.name;                       // Name ermitteln (z.B. Vorratsraum:0.LOWBAT)
+        if (typeof(stateName) != 'undefined' && stateName != null) {  // Es konnte ein Name aus der Objektstruktur gelesen werden
+          ad = stateName.match(":0.");                                // Prüfen ob Name passt, da manche Geraete mehrere LowBat Flags haben
+          if(ad) {                                                    // Wenn Zeichenkette vorhanden
+            n = stateName.split(":0.");                               // String splitten, n[0] enthaelt dann 'Vorratsraum'
+            //Geraetetyp pruefen ob auf der IgnoreList
+            s = obj.split(".");                                       // ID spitten
+            masterid = s[0] + "." + s[1] + "." + s[2];                // und neu zusammen setzen
+            mastertype = "_" + getObject(masterid).native.TYPE + "_"; // Device Typ auslesen
+            s = devIgnoreHM.match(mastertype);                        // Pruefen ob in Sperrliste
+            if(s) {
+              // Geraet befindet sich auf der Sperrliste und wird nicht ueberwacht
+              myDebug("Geraet " + header + n[0] + " mit ID " + obj + " NICHT zur Watchlist hinzugefuegt (Sperrliste)" );
+            } else {
+              // Dieses Geraet wird in die Watchlist aufgenommen
+              //watchlist.push({id:obj, name:header + n[0], tool:adType, lowcount:0,isLow:false, isSend:false, stateType:STATUSTYP_FLAG, value:0});
+              watchlist.push({id:obj, name:header + n[0], tool:adType, lowcount:0,isLow:false, isSend:false, stateType:STATUSTYP_FLAG, thandle:null});
+              myDebug("Geraet " + header + n[0] + " mit ID " + obj + " zur Watchlist hinzugefuegt" );
+            }
           }
+        } else {  // Aus der Objektstruktur konnte kein Name ausgelesen werden, Warnmeldung erzeugen
+          stateName = getObject(obj)._id;
+          log("Das Geraet mit der Bezeichnung " + stateName + " stellt keinen Namen zur Verfügung! Bitte das Gerät in der Homematic eindeutig bezeichnen!, Geraet wird nicht ueberwacht!", 'warn');
         }
       }
     });
@@ -579,7 +584,7 @@ function stateCreate() {
     createState(stateHeader + STATE_REPLACE_STARTFLAG + r, {
          type:   'boolean',
          read:   true,
-         desc:   r,
+         desc:   "For VIS",
          write:  true,
          def:    false
      },false);

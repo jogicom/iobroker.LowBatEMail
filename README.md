@@ -152,19 +152,25 @@ Bitte vorranig ueber ein neues Issue hier auf Github einstellen, oder wenn es ni
 
 # History
 
+**0.1.6 (2021-10-18)**
+
+- (jogicom)
+  - Fehler behoben, wenn Geräte in der Homematic nicht mit Namen versehen sind (Object in IOBroker hat kein "name" wird jetzt eine Warnmeldung im Log erzeugt
+  - Falscher Datentyp bei der Object Erstellung von STATE_REPLACE_STARTFLAG beseitigt
+
 **0.1.5 (2020-06-07)**
 
 - (jogicom)
   - Fehler behoben, wenn bei ScriptStart ein Geraet LOWBAT hatte
   - Fehler behoben, wenn ein Gerät einen kurzfristigen LOWBAT hatte
-  
+
 
 **0.1.4 (2020-06-05)**
 
 - (jogicom)
   - Anpassungen des ReadMe wegen fehlendem Indicator
   - VIS Template war kaputt, neu hochgeladen
-  
+
 
 **0.1.4 (2020-05-14)**
 
