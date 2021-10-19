@@ -1,4 +1,4 @@
-// LowBattEMail.js V 0.1.6
+// LowBattEMail.js V 0.1.7
 // Geraete mit LowBat per EMail melden
 // (c) 2021 WagoTEC.de, freigegeben unter MIT Lizenz
 
@@ -20,7 +20,7 @@ var adapterList = [ {header:"", name:"hm-rpc.1.", typ:TOOLTYPE_HM}];
 //  log(debugtext);               // Ausgabe der Debugtexte bei Bedarf aktivieren
 //}
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ende individuelle Konfiguration !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const SCRIPT_VERSION      = "V 0.1.6";                  // Version Info
+const SCRIPT_VERSION      = "V 0.1.7";                  // Version Info
 const COLOR_LOWBAT        = "#ff0033";                  // Zeilenfarbe wenn Gerät LowBat
 const COLOR_OKBAT         = "#00ff00";                  // Zeilenfarbe wenn Gerät OK
 const SHORT_LOWBAT_TIME   = 360000;                     // ms nach 6 Minuten gilt Gerät als Dauerhaft LOWBAT
@@ -288,7 +288,7 @@ function addToWatchlist(header,adapter, adType) {
           if(ad) {                                                    // Wenn Zeichenkette vorhanden
             n = stateName.split(":0.");                               // String splitten, n[0] enthaelt dann 'Vorratsraum'
             //Geraetetyp pruefen ob auf der IgnoreList
-            s = obj.split(".");                                       // ID spitten
+            s = obj.split(".");                                       // ID splitten
             masterid = s[0] + "." + s[1] + "." + s[2];                // und neu zusammen setzen
             mastertype = "_" + getObject(masterid).native.TYPE + "_"; // Device Typ auslesen
             s = devIgnoreHM.match(mastertype);                        // Pruefen ob in Sperrliste
@@ -304,7 +304,7 @@ function addToWatchlist(header,adapter, adType) {
           }
         } else {  // Aus der Objektstruktur konnte kein Name ausgelesen werden, Warnmeldung erzeugen
           stateName = getObject(obj)._id;
-          log("Das Geraet mit der Bezeichnung " + stateName + " stellt keinen Namen zur Verfügung! Bitte das Gerät in der Homematic eindeutig bezeichnen!, Geraet wird nicht ueberwacht!", 'warn');
+          log("Das Geraet mit der Bezeichnung " + stateName + " stellt keinen Namen zur Verfügung! Bitte die Einstellung des hm-rega Adapters überprüfen!, Geraet wird nicht ueberwacht!", 'warn');
         }
       }
     });

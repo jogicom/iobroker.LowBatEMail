@@ -26,6 +26,7 @@ Javascript zum versenden von Status Mails bei Aenderung von Batteriezustaenden.
 
 ## Benoetigte Hard/Software
 - Homematic CCU (auf CCU2,CCU3 und Raspberrymatic getestet)
+  - Die Geräte sollten in der Homematic mit individuellen Namen versehen werden
 - IO-Broker mit ...
   - Java-Script Adapter
   - Email-Adapter
@@ -146,16 +147,25 @@ Fehlt diese Rolle, muss sie manuell eingetragen werden. Danach das Script neu st
 
 Ab der **IObroker hm-rpc Version 1.14.6** sollte das Problem gelöst sein.
 
+### Warnmeldungen im Log, Geräte haben keinen Namen im Object
+
+Dies tritt auf, wenn der hm-rega-Adapter nicht richtig konfiguriert ist und dadurch die Namen der Geräte nicht an IOBroker übermittelt werden. Vor der Version 0.1.6 führte dies zum Abbruch des Scriptes. Jetzt werden im Logbuch Warnmeldungen erzeugt, welche die entsprechende Gerätenummer anzeigt. Bitte dann die Konfiguration des hm-rega überprüfen. **Achtung! Die Geräte ohne Namen werden NICHT auf LowBat überwacht!**
+
 ### Fehlerreports
 
 Bitte vorranig ueber ein neues Issue hier auf Github einstellen, oder wenn es nicht anders geht per mail an <support@wagotec.de>. Eine genaue Fehlerbeschreibung ist zwingend anzugeben!
 
 # History
 
+**0.1.7 (2021-10-19)**
+
+- (jogicom)
+  - Kleine Anpassungen an den Warntexten und im ReadMe
+
 **0.1.6 (2021-10-18)**
 
 - (jogicom)
-  - Fehler behoben, wenn Geräte in der Homematic nicht mit Namen versehen sind (Object in IOBroker hat kein "name" wird jetzt eine Warnmeldung im Log erzeugt
+  - Fehler behoben, wenn Geräte in der Homematic nicht mit Namen versehen sind (Object in IOBroker hat kein "name") jetzt wird eine Warnmeldung im Log erzeugt (Danke an Markus!)
   - Falscher Datentyp bei der Object Erstellung von STATE_REPLACE_STARTFLAG beseitigt
 
 **0.1.5 (2020-06-07)**
