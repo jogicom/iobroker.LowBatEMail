@@ -73,7 +73,7 @@ Für die Versendung der EMail ist es zwingend noetig, die Adressen festzulegen. 
 
 ### Debug Meldungen konfigurieren
 
-Wenn die Globale Debug-Routine von mir (Siehe [Debug Routine](https://wagotec.de/index.php/iobroker-projekte/18-hausautomation/iobroker/iobroker-projekte/31-iobroker-javascript-debug-routine) ) nicht installiert wurde, kommt es zu Fehlermeldungen, weil die Funktion "myDebug" nicht vorhanden ist.
+Wenn die Globale Debug-Routine von mir (Siehe [Debug Routine](https://wagotec.de/iobroker-javascript-debug-routine) ) nicht installiert wurde, kommt es zu Fehlermeldungen, weil die Funktion "myDebug" nicht vorhanden ist.
 
 Entweder das Debug Script installieren, oder die folgenden Zeilen im Script wahlweise aktivieren:
 
